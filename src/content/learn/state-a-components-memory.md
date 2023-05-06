@@ -1,10 +1,10 @@
 ---
-title: "State: A Component's Memory"
+title: "State: コンポーネントの記憶"
 ---
 
 <Intro>
 
-Components often need to change what's on the screen as a result of an interaction. Typing into the form should update the input field, clicking "next" on an image carousel should change which image is displayed, clicking "buy" should put a product in the shopping cart. Components need to "remember" things: the current input value, the current image, the shopping cart. In React, this kind of component-specific memory is called *state*.
+コンポーネントは、インタラクションの結果として画面上の表示を変更する必要がよくあります。フォームに入力すると入力欄が更新されるべきであり、画像カルーセルで「次へ」をクリックすると表示される画像が変わるべきであり、「購入」をクリックすると商品がショッピングカートに入るべきです。コンポーネントは、現在の入力値、現在の画像、ショッピングカートなどの「記憶」が必要です。React では、このようなコンポーネント固有のメモリは *state* と呼ばれます。
 
 </Intro>
 
@@ -15,11 +15,16 @@ Components often need to change what's on the screen as a result of an interacti
 * How to add more than one state variable
 * Why state is called local
 
+* [`useState`](/reference/react/useState) フックを使って state 変数を追加する方法
+* useState フックが返す値のペア
+* 複数の state 変数を追加する方法
+* なぜ state がローカルと呼ばれるか
+
 </YouWillLearn>
 
-## When a regular variable isn’t enough {/*when-a-regular-variable-isnt-enough*/}
+## 通常の変数では十分でない場合 {/*when-a-regular-variable-isnt-enough*/}
 
-Here's a component that renders a sculpture image. Clicking the "Next" button should show the next sculpture by changing the `index` to `1`, then `2`, and so on. However, this **won't work** (you can try it!):
+ここに彫刻の画像を表示するコンポーネントがあります。「Next」ボタンをクリックすると、`index` を `1` に変更して次の彫刻を表示し、その後 `2` に変更して、といったように続いていきます。しかし、これは **機能しません**（試してみてください！）
 
 <Sandpack>
 
@@ -151,46 +156,53 @@ button {
 
 </Sandpack>
 
-The `handleClick` event handler is updating a local variable, `index`. But two things prevent that change from being visible:
+`handleClick` イベントハンドラは、ローカル変数 `index` を更新しています。しかし、2 つのことがその変更が目に見えるのを妨げています。
 
-1. **Local variables don't persist between renders.** When React renders this component a second time, it renders it from scratch—it doesn't consider any changes to the local variables.
+1. **ローカル変数はレンダリング間で持続しません。** React がこのコンポーネントを 2 回目にレンダーするとき、最初からレンダーし直します。つまり、ローカル変数の変更は考慮されません。
 2. **Changes to local variables won't trigger renders.** React doesn't realize it needs to render the component again with the new data.
+2. **ローカル変数への変更はレンダーをトリガーしません。** React は新しいデータで再度コンポーネントをレンダーする必要があることに気付きません。
 
 To update a component with new data, two things need to happen:
+コンポーネントを新しいデータで更新するためには、以下の 2 つのことが必要です。
 
 1. **Retain** the data between renders.
+1. レンダー間でデータを**保持する**。
 2. **Trigger** React to render the component with new data (re-rendering).
+2. 新しいデータでコンポーネントをレンダーする（再レンダー）ために React を**トリガする**。
 
-The [`useState`](/reference/react/useState) Hook provides those two things:
+[`useState`](/reference/react/useState) フックは、これら 2 つの機能を提供します。
 
-1. A **state variable** to retain the data between renders.
-2. A **state setter function** to update the variable and trigger React to render the component again.
+1. レンダー間でデータを保持するための **state 変数**。
+2. 変数を更新し、React が再度コンポーネントをレンダーするようにトリガする **state セッタ関数**。
 
-## Adding a state variable {/*adding-a-state-variable*/}
+## state 変数を追加する {/*adding-a-state-variable*/}
 
-To add a state variable, import `useState` from React at the top of the file:
+state 変数を追加するには、ファイルの先頭で React から `useState` をインポートします。
 
 ```js
 import { useState } from 'react';
 ```
 
-Then, replace this line:
+そして次の行を、
 
 ```js
 let index = 0;
 ```
 
-with
+以下に置き換えます。
 
 ```js
 const [index, setIndex] = useState(0);
 ```
 
-`index` is a state variable and `setIndex` is the setter function.
+`index` は state 変数であり、`setIndex` はセッタ関数です。
 
-> The `[` and `]` syntax here is called [array destructuring](https://javascript.info/destructuring-assignment) and it lets you read values from an array. The array returned by `useState` always has exactly two items.
 
-This is how they work together in `handleClick`:
+これが handleClick 内でどのように連携して動作するかは次の通りです：
+
+> ここでの `[` と `]` の構文は [配列の分割代入](https://javascript.info/destructuring-assignment) と呼ばれ、配列から値を読み取ることができます。`useState` によって返される配列には常に正確に 2 つの要素が含まれています。
+
+これが `handleClick` 内でどのように連携して動作するかは次の通りです。
 
 ```js
 function handleClick() {
@@ -198,7 +210,7 @@ function handleClick() {
 }
 ```
 
-Now clicking the "Next" button switches the current sculpture:
+これで、「Next」ボタンをクリックすると現在の彫刻が切り替わります。
 
 <Sandpack>
 
@@ -331,57 +343,57 @@ button {
 
 </Sandpack>
 
-### Meet your first Hook {/*meet-your-first-hook*/}
+### はじめてのフックに出会う {/*meet-your-first-hook*/}
 
-In React, `useState`, as well as any other function starting with "`use`", is called a Hook.
+React では、`useState` をはじめ、"`use`" で始まる他の関数もフックと呼ばれます。
 
-*Hooks* are special functions that are only available while React is [rendering](/learn/render-and-commit#step-1-trigger-a-render) (which we'll get into in more detail on the next page). They let you "hook into" different React features.
+*フック* は、React がレンダー中にのみ利用可能な特殊な関数です（次のページで詳しく説明します）。フックを使うことで、さまざまな React の機能を「引っ掛ける」ことができます。
 
-State is just one of those features, but you will meet the other Hooks later.
+State はその機能の 1 つに過ぎませんが、後で他のフックにも出会うことになります。
 
 <Pitfall>
 
-**Hooks—functions starting with `use`—can only be called at the top level of your components or [your own Hooks.](/learn/reusing-logic-with-custom-hooks)** You can't call Hooks inside conditions, loops, or other nested functions. Hooks are functions, but it's helpful to think of them as unconditional declarations about your component's needs. You "use" React features at the top of your component similar to how you "import" modules at the top of your file.
+**フック、つまり `use` で始まる関数は、コンポーネントのトップレベルか[独自のフック](/learn/reusing-logic-with-custom-hooks)でのみ呼び出すことができます。** 条件、ループ、または他のネストされた関数の中でフックを呼び出すことはできません。フックは関数ですが、コンポーネントのニーズに関する無条件の宣言として考えるとわかりやすくなります。コンポーネントのトップで React の機能を「使用」するのは、ファイルのトップでモジュールを「インポート」するのに似ています。
 
 </Pitfall>
 
-### Anatomy of `useState` {/*anatomy-of-usestate*/}
+### `useState` の構造 {/*anatomy-of-usestate*/}
 
-When you call [`useState`](/reference/react/useState), you are telling React that you want this component to remember something:
+[`useState`](/reference/react/useState) を呼び出すとき、React にこのコンポーネントが何かを覚えておくことを要求しています：
 
 ```js
 const [index, setIndex] = useState(0);
 ```
 
-In this case, you want React to remember `index`.
+これは React に `index` を覚えておいてほしい場合です。
 
 <Note>
 
-The convention is to name this pair like `const [something, setSomething]`. You could name it anything you like, but conventions make things easier to understand across projects.
+慣習的にはこのペアには、`const [何か, set何か]` のように名前を付けます。好きな名前を付けることができますが、慣習に従うことがプロジェクト間の理解を簡単にします。
 
 </Note>
 
-The only argument to `useState` is the **initial value** of your state variable. In this example, the `index`'s initial value is set to `0` with `useState(0)`. 
+`useState` の唯一の引数は、state 変数の**初期値**です。この例では、`useState(0)` で `index` の初期値が `0` に設定されています。
 
-Every time your component renders, `useState` gives you an array containing two values:
+コンポーネントがレンダーされるたびに、`useState` は次の 2 つの値が入った配列を返します。
 
-1. The **state variable** (`index`) with the value you stored.
-2. The **state setter function** (`setIndex`) which can update the state variable and trigger React to render the component again.
+1. 保存した値を持つ state 変数 (`index`)。
+2. state 変数を更新し、React がコンポーネントを再レンダリングするのをトリガーする **state セッタ関数** (`setIndex`)。
 
-Here's how that happens in action:
+これが実際にどのように動作するかを見てみましょう。
 
 ```js
 const [index, setIndex] = useState(0);
 ```
 
-1. **Your component renders the first time.** Because you passed `0` to `useState` as the initial value for `index`, it will return `[0, setIndex]`. React remembers `0` is the latest state value.
-2. **You update the state.** When a user clicks the button, it calls `setIndex(index + 1)`. `index` is `0`, so it's `setIndex(1)`. This tells React to remember `index` is `1` now and triggers another render.
-3. **Your component's second render.** React still sees `useState(0)`, but because React *remembers* that you set `index` to `1`, it returns `[1, setIndex]` instead.
-4. And so on!
+1. **コンポーネントが初めてレンダーされる。** `useState` に `index` の初期値として `0` を渡すので、`[0, setIndex]` が返されます。 React は最新の state の値が `0` であることを記憶しています。
+2. **state を更新します。**ユーザーがボタンをクリックすると、 `setIndex(index + 1)` が呼び出されます。 `index` は `0` なので、 `setIndex(1)` です。これにより、React は `index` が今 `1` であると覚えておくよう指示し、もう一度レンダーがトリガーされます。
+3. **コンポーネントの2回目のレンダー。**React はまだ useState(0) を見ますが、React が `index` を `1` に設定したことを覚えているため、代わりに `[1, setIndex]` を返します。
+4. これが続きます！
 
-## Giving a component multiple state variables {/*giving-a-component-multiple-state-variables*/}
+## コンポーネントに複数の state 変数を与える {/*giving-a-component-multiple-state-variables*/}
 
-You can have as many state variables of as many types as you like in one component. This component has two state variables, a number `index` and a boolean `showMore` that's toggled when you click "Show details":
+1 つのコンポーネントに、好きなだけ多くの種類の state 変数を持たせることができます。このコンポーネントには 2 つの state 変数があり、数値の `index` と、「Show details」をクリックすると切り替わる真偽値の `showMore` があります。
 
 <Sandpack>
 
